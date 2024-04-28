@@ -1,7 +1,6 @@
 import { Course } from "src/domain/entities/course";
 import { Lesson } from "src/domain/entities/lesson";
 import { Student } from "src/domain/entities/student";
-import { StudentCourse } from "src/domain/entities/studentCourse";
 import { Teacher } from "src/domain/entities/teacher";
 import { CannotApproveStudentError } from "src/errors/cannot-approve-student";
 import { describe, it, expect } from "vitest";

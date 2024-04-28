@@ -3,7 +3,7 @@ import { Entity } from "./base-entity";
 import { Course } from "./course";
 import { Lesson } from "./lesson";
 import { StudentLesson } from "./studentLesson";
-import { StudentCourse, StudentCourseStatus } from "./studentCourse";
+import { StudentCourse } from "./studentCourse";
 
 interface StudentProps {
   name: string;
