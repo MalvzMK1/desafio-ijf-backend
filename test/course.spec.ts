@@ -1,8 +1,8 @@
-import { afterEach } from "node:test";
 import { Course } from "src/domain/entities/course";
 import { Lesson } from "src/domain/entities/lesson";
 import { Student } from "src/domain/entities/student";
 import { Teacher } from "src/domain/entities/teacher";
+import { CannotCreateError } from "src/errors/cannot-create";
 import { CourseRepository } from "src/repositories/course.repository";
 import { describe, it, expect, beforeEach } from "vitest";
 
@@ -136,5 +136,21 @@ describe("Course", () => {
 
     expect(repoCourse.props.lessons.length).toStrictEqual(1);
     expect(repoCourse.props.lessons[0]).toStrictEqual(lesson1);
+  });
+
+  it("should not be possible to create a course without lessons", () => {
+    expect(() => {
+      new Course({
+        name: "Course 1",
+        description: "Test course n1",
+        banner: "test_banner.jpg",
+        lessons: [],
+        teacher: new Teacher({
+          name: "Bob Doe",
+          password: "123123",
+          username: "bob.doe.teacher",
+        }),
+      });
+    }).toThrowError(CannotCreateError);
   });
 });

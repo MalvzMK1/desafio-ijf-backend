@@ -1,4 +1,5 @@
 import { Course } from "src/domain/entities/course";
+import { Lesson } from "src/domain/entities/lesson";
 import { Teacher } from "src/domain/entities/teacher";
 import { CannotCreateError } from "src/errors/cannot-create";
 import { CourseRepository } from "src/repositories/course.repository";
@@ -26,6 +27,11 @@ describe("Course repository", () => {
       description: "course description",
       name: "course1",
       teacher,
+      lessons: [
+        new Lesson({
+          content: "content",
+        }),
+      ],
     });
 
     repository.store(course);
@@ -51,6 +57,11 @@ describe("Course repository", () => {
       description: "course description",
       name: "course1",
       teacher,
+      lessons: [
+        new Lesson({
+          content: "content",
+        }),
+      ],
     });
 
     repository.store(course);
