@@ -8,8 +8,8 @@ import {
 } from "@nestjs/common";
 import { GqlExecutionContext } from "@nestjs/graphql";
 import { JwtService } from "@nestjs/jwt";
-import { UserRole } from "src/graphql/inputs/auth/register.input";
 import { AppContext, ContextUser } from "src/types/app-context";
+import { UserRole } from "src/types/user-role";
 
 @Injectable()
 export class AuthGuard implements CanActivate {

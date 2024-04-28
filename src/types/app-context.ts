@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { User } from "src/graphql/entities/user";
-import { UserRole } from "src/graphql/inputs/auth/register.input";
+import { UserRole } from "./user-role";
 
 export type ContextUser = Omit<User, "password"> & { role: UserRole };
 

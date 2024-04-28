@@ -41,4 +41,6 @@ export async function getUserFromHeaders(
       username: teacher.username,
     } as ContextUser;
   }
+
+  return undefined;
 }
