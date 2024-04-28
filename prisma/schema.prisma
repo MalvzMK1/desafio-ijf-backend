@@ -13,9 +13,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id String @id @default(uuid())
-  name String
+model Student {
+  id            String          @id @default(uuid())
+  name          String
+  password      String
+  username      String          @unique
+  StudentCourse StudentCourse[]
+  StudentLesson StudentLesson[]
+}
+
+model Teacher {
+  id       String   @id @default(uuid())
+  name     String
   password String
-  username String @unique
+  username String   @unique
+  Course   Course[]
+}
+
+model Course {
+  id          String @id @default(uuid())
+  teacherId   String
+  name        String @unique
+  description String
+  banner      String
+
+  teacher       Teacher         @relation(fields: [teacherId], references: [id])
+  StudentCourse StudentCourse[]
+}
+
+model Lesson {
+  id            String          @id @default(uuid())
+  content       String
+  StudentLesson StudentLesson[]
+}
+
+model StudentCourse {
+  id        String @id @default(uuid())
+  studentId String
+  courseId  String
+  status    String @default("not-started")
+
+  student Student @relation(fields: [studentId], references: [id])
+  course  Course  @relation(fields: [courseId], references: [id])
+}
+
+model StudentLesson {
+  id        String  @id @default(uuid())
+  studentId String
+  lessonId  String
+  watched   Boolean @default(false)
+
+  student Student @relation(fields: [studentId], references: [id])
+  lesson  Lesson  @relation(fields: [lessonId], references: [id])
 }
