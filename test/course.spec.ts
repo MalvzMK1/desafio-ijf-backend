@@ -3,6 +3,7 @@ import { Lesson } from "src/domain/entities/lesson";
 import { Student } from "src/domain/entities/student";
 import { Teacher } from "src/domain/entities/teacher";
 import { CannotCreateError } from "src/errors/cannot-create";
+import { CannotDeleteError } from "src/errors/cannot-delete";
 import { CourseRepository } from "src/repositories/course.repository";
 import { describe, it, expect, beforeEach } from "vitest";
 
@@ -136,6 +137,10 @@ describe("Course", () => {
 
     expect(repoCourse.props.lessons.length).toStrictEqual(1);
     expect(repoCourse.props.lessons[0]).toStrictEqual(lesson1);
+
+    expect(() => {
+      repoCourse.removeLesson(lesson1.id);
+    }).toThrowError(CannotDeleteError);
   });
 
   it("should not be possible to create a course without lessons", () => {
