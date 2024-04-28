@@ -1,6 +1,10 @@
 import { Entity } from "./base-entity";
 
-interface LessonProps {}
+type LessonContent = string | Blob;
+
+interface LessonProps {
+  content: LessonContent;
+}
 
 export class Lesson extends Entity<LessonProps> {
   constructor(props: LessonProps) {
