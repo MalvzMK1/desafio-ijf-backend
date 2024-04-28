@@ -4,6 +4,7 @@ import { Student } from "./student";
 import { Teacher } from "./teacher";
 import { NotFoundError } from "src/errors/not-found-error";
 import { Lesson } from "./lesson";
+import { CannotDeleteError } from "src/errors/cannot-delete";
 
 export interface CourseProps {
   teacher: Teacher;
@@ -56,6 +57,8 @@ export class Course extends Entity<CourseProps> {
   }
 
   removeLesson(lessonId: Lesson["id"]): void {
+    if (this.props.lessons.length < 2)
+      throw new CannotDeleteError("A course needs to have at least one lesson");
     const foundLessonIdx = this.props.lessons.findIndex(
       (item) => item.id === lessonId,
     );
