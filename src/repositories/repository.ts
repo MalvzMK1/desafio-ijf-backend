@@ -34,19 +34,3 @@ export abstract class Repository<T extends Entity<K>, K> {
     return foundItemIdx;
   }
 }
-
-/**
- * {
-    const foundItemIdx = this.#data.findIndex((item) => item.id === id);
-
-    if (foundItemIdx < 0) throw new NotFoundError();
-
-    const { props: currentProps } = this.#data[foundItemIdx];
-    const newProps = {
-      ...currentProps,
-      ...props,
-    };
-
-    this.#data[foundItemIdx].props = newProps;
-  }
- */
