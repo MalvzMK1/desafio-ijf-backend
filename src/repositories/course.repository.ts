@@ -14,7 +14,9 @@ export class CourseRepository extends Repository<Course, CourseProps> {
 
   update(id: string, props: Partial<Omit<CourseProps, "teacher">>): Course {
     const foundItemIdx = this.findItemIndexById(id);
+
     this.data[foundItemIdx].edit(props);
+
     return this.data[foundItemIdx];
   }
 }
