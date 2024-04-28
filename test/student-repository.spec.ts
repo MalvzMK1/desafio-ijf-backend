@@ -1,5 +1,6 @@
 import { Student } from "src/domain/entities/student";
 import { CannotCreateError } from "src/errors/cannot-create";
+import { NotFoundError } from "src/errors/not-found-error";
 import { StudentRepository } from "src/repositories/student.repository";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -78,5 +79,19 @@ describe("Student repository tests", () => {
 
     expect(repository.fetch().length).toStrictEqual(1);
     expect(repository.fetch().includes(student1)).toBeFalsy();
+  });
+
+  it("should not find a user", () => {
+    const student1 = new Student({
+      name: "John Doe",
+      password: "123123",
+      username: "johhny.doe",
+    });
+
+    repository.store(student1);
+
+    expect(() => {
+      repository.get("test_id");
+    }).toThrowError(NotFoundError);
   });
 });

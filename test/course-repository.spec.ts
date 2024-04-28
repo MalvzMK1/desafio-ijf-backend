@@ -3,6 +3,7 @@ import { Lesson } from "src/domain/entities/lesson";
 import { Student } from "src/domain/entities/student";
 import { Teacher } from "src/domain/entities/teacher";
 import { CannotCreateError } from "src/errors/cannot-create";
+import { NotFoundError } from "src/errors/not-found-error";
 import { CourseRepository } from "src/repositories/course.repository";
 import { describe, it, expect, beforeEach } from "vitest";
 
@@ -160,5 +161,30 @@ describe("Course repository", () => {
     expect(course2students.length).toStrictEqual(2);
     expect(course2students[0]).toStrictEqual(student3);
     expect(course2students[1]).toStrictEqual(student4);
+  });
+
+  it("should not find a course", () => {
+    const teacher = new Teacher({
+      name: "John Doe",
+      password: "123123",
+      username: "johhnydoe.teacher",
+    });
+    const course = new Course({
+      banner: "banner.png",
+      description: "course description",
+      name: "course1",
+      teacher,
+      lessons: [
+        new Lesson({
+          content: "content",
+        }),
+      ],
+    });
+
+    repository.store(course);
+
+    expect(() => {
+      repository.get("test_id");
+    }).toThrowError(NotFoundError);
   });
 });
