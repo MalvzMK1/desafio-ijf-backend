@@ -2,6 +2,7 @@ import { CannotCreateError } from "src/errors/cannot-create";
 import { Entity } from "./base-entity";
 import { Student } from "./student";
 import { Teacher } from "./teacher";
+import { NotFoundError } from "src/errors/not-found-error";
 
 export interface CourseProps {
   teacher: Teacher;
@@ -32,5 +33,15 @@ export class Course extends Entity<CourseProps> {
       throw new CannotCreateError("Student already exists");
 
     this.props.students.push(student);
+  }
+
+  removeStudent(studentId: Student["id"]): void {
+    const foundStudentIdx = this.props.students.findIndex(
+      (item) => item.id === studentId,
+    );
+
+    if (foundStudentIdx < 0) throw new NotFoundError();
+
+    this.props.students = this.props.students.splice(foundStudentIdx, 1);
   }
 }
