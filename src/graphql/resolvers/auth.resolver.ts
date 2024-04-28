@@ -6,6 +6,13 @@ import { AppContext } from "src/types/app-context";
 import { getUserFromHeaders } from "src/utils/get-user-from-headers";
 import * as bcrypt from "bcrypt";
 import { env } from "src/env";
+import { LoginResponse } from "../responses/auth/login-response.type";
+import { LoginInput } from "../inputs/auth/login.input";
+import { UserRoleEnum } from "src/types/user-role";
+import { InvalidCredentialsError } from "src/errors/invalid-credentials";
+import { createAccessToken } from "src/utils/jwt";
+import { User } from "../entities/user";
+import { ForbiddenException } from "@nestjs/common";
 
 @Resolver()
 export class AuthResolver {
@@ -13,16 +20,52 @@ export class AuthResolver {
   async me(@Context() ctx: AppContext): Promise<MeResponse> {
     const user = await getUserFromHeaders(ctx.request.headers);
 
-    return user as MeResponse;
+    if (user) return user as MeResponse;
+    else throw new ForbiddenException();
+  }
+
+  @Mutation(() => LoginResponse, { nullable: false })
+  async login(
+    @Args("input", { type: () => LoginInput, nullable: false })
+    input: LoginInput,
+  ): Promise<LoginResponse> {
+    let users: Array<User>;
+
+    if (input.role === UserRoleEnum.student) {
+      users = await prisma.student.findMany({
+        where: {
+          username: input.username,
+        },
+      });
+    } else {
+      users = await prisma.teacher.findMany({
+        where: {
+          username: input.username,
+        },
+      });
+    }
+
+    if (users.length < 1) throw new InvalidCredentialsError();
+
+    const valid = await bcrypt.compare(input.password, users[0].password);
+
+    if (valid) {
+      return {
+        token: createAccessToken(users[0].id, input.role),
+      } as LoginResponse;
+    }
+
+    throw new InvalidCredentialsError();
   }
 
   @Mutation(() => MeResponse, { nullable: false })
-  registerUser(
+  async registerUser(
     @Args("input", { type: () => RegisterInput, nullable: false })
     input: RegisterInput,
   ): Promise<MeResponse> {
-    if (input.role === "student") return this.#registerStudent(input);
-    else if (input.role === "teacher") return this.#registerTeacher(input);
+    if (input.role === "student") return await this.#registerStudent(input);
+    else if (input.role === "teacher")
+      return await this.#registerTeacher(input);
   }
 
   async #registerStudent(input: RegisterInput): Promise<MeResponse> {

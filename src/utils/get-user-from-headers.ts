@@ -7,7 +7,7 @@ export async function getUserFromHeaders(
 ): Promise<ContextUser | undefined> {
   const { authorization } = headers;
 
-  if (!authorization || !authorization.startsWith("Bearer ")) return undefined;
+  if (!authorization) return undefined;
 
   const token = authorization.slice(7);
   const { sub, userRole } = getTokenPayload(token);
