@@ -3,6 +3,7 @@ import { Lesson } from "src/domain/entities/lesson";
 import { Student } from "src/domain/entities/student";
 import { StudentCourse } from "src/domain/entities/studentCourse";
 import { Teacher } from "src/domain/entities/teacher";
+import { CannotApproveStudentError } from "src/errors/cannot-approve-student";
 import { describe, it, expect } from "vitest";
 
 describe("Student tests", () => {
@@ -36,29 +37,45 @@ describe("Student tests", () => {
       courses: [course],
     });
 
-    expect(student.props.lessons.length).toStrictEqual(3);
-    expect(student.props.lessons[0].props.watched).toBeFalsy();
+    const { lessons, courses } = student.props;
 
-    expect(student.props.courses.length).toStrictEqual(1);
-    expect(student.props.courses[0].props.course).toStrictEqual(course);
-    expect(student.props.courses[0].props.status).toStrictEqual("not-started");
+    expect(lessons.length).toStrictEqual(3);
+    expect(lessons[0].props.watched).toBeFalsy();
+
+    expect(courses.length).toStrictEqual(1);
+    expect(courses[0].props.course).toStrictEqual(course);
+    expect(courses[0].props.status).toStrictEqual("not-started");
 
     student.toggleWatchedLessonStatus(lesson1.id);
 
-    expect(student.props.lessons[0].props.watched).toBeTruthy();
-    expect(student.props.lessons[1].props.watched).toBeFalsy();
-    expect(student.props.courses[0].props.status).toStrictEqual("in-progress");
+    expect(lessons[0].props.watched).toBeTruthy();
+    expect(lessons[1].props.watched).toBeFalsy();
+    expect(courses[0].props.status).toStrictEqual("in-progress");
 
     student.toggleWatchedLessonStatus(lesson2.id);
-    expect(student.props.lessons[1].props.watched).toBeTruthy();
-    expect(student.props.courses[0].props.status).toStrictEqual("in-progress");
+    expect(lessons[1].props.watched).toBeTruthy();
+    expect(courses[0].props.status).toStrictEqual("in-progress");
 
     student.toggleWatchedLessonStatus(lesson3.id);
-    expect(student.props.lessons[2].props.watched).toBeTruthy();
-    expect(student.props.courses[0].props.status).toStrictEqual("finished");
+    expect(lessons[2].props.watched).toBeTruthy();
+    expect(courses[0].props.status).toStrictEqual("finished");
 
     student.toggleWatchedLessonStatus(lesson2.id);
-    expect(student.props.lessons[1].props.watched).toBeFalsy();
-    expect(student.props.courses[0].props.status).toStrictEqual("in-progress");
+    expect(lessons[1].props.watched).toBeFalsy();
+    expect(courses[0].props.status).toStrictEqual("in-progress");
+
+    expect(() => {
+      courses[0].approve();
+    }).toThrowError(CannotApproveStudentError);
+
+    student.toggleWatchedLessonStatus(lesson2.id);
+    expect(lessons[1].props.watched).toBeTruthy();
+    expect(courses[0].props.status).toStrictEqual("finished");
+
+    expect(() => {
+      courses[0].approve();
+    }).not.toThrowError(CannotApproveStudentError);
+
+    expect(courses[0].props.status).toStrictEqual("approved");
   });
 });
