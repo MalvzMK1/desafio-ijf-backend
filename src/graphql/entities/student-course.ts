@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from "@nestjs/graphql";
+import { Field, ID, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { BaseEntity } from "./base-entity";
 import { Student } from "./student";
 import { Course } from "./course";
@@ -22,3 +22,6 @@ export class StudentCourse extends BaseEntity {
   @Field(() => StudentCourseStatusEnum, { nullable: false })
   status: StudentCourseStatus;
 }
+registerEnumType(StudentCourseStatusEnum, {
+  name: "StudentCourseStatus",
+});

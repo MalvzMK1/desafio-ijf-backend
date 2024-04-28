@@ -52,11 +52,11 @@ model Lesson {
 }
 
 model StudentCourse {
-  id         String   @id @default(uuid())
-  created_at DateTime @default(now())
+  id         String              @id @default(uuid())
+  created_at DateTime            @default(now())
   studentId  String
   courseId   String
-  status     String   @default("not-started")
+  status     StudentCourseStatus @default(notStarted)
 
   student Student @relation(fields: [studentId], references: [id])
   course  Course  @relation(fields: [courseId], references: [id])
@@ -71,4 +71,11 @@ model StudentLesson {
 
   student Student @relation(fields: [studentId], references: [id])
   lesson  Lesson  @relation(fields: [lessonId], references: [id])
+}
+
+enum StudentCourseStatus {
+  notStarted
+  inProgress
+  finished
+  approved
 }

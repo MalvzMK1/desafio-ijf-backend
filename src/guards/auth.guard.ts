@@ -5,11 +5,14 @@ import {
   ForbiddenException,
   UnauthorizedException,
   UseGuards,
+  Logger,
 } from "@nestjs/common";
 import { GqlExecutionContext } from "@nestjs/graphql";
 import { JwtService } from "@nestjs/jwt";
 import { AppContext, ContextUser } from "src/types/app-context";
 import { UserRole } from "src/types/user-role";
+import { getUserFromHeaders } from "src/utils/get-user-from-headers";
+import { getTokenPayload } from "src/utils/jwt";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -20,29 +23,20 @@ export class AuthGuard implements CanActivate {
     private errorMessage?: string,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context).getContext<AppContext>();
-    const authorizationHeader = ctx.request.headers.authorization;
 
-    if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
-      return false;
-    }
-
-    const token = authorizationHeader.slice(7);
     try {
-      const decoded = this.#jwtService.verify<ContextUser>(token);
+      const user = await getUserFromHeaders(ctx.request.headers);
 
-      if (this.allowedRoles && !this.allowedRoles.includes(decoded.role)) {
-        throw new ForbiddenException(this.errorMessage);
-      }
+      ctx.user = user;
 
-      ctx.user = decoded;
       return true;
-    } catch (error) {
-      if (error instanceof ForbiddenException) throw error;
+    } catch (err) {
+      Logger.error(err);
     }
 
-    throw new UnauthorizedException();
+    return false;
   }
 }
 

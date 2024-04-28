@@ -4,8 +4,8 @@ import { Course } from "./course";
 import { Student } from "./student";
 
 export type StudentCourseStatus =
-  | "not-started"
-  | "in-progress"
+  | "notStarted"
+  | "inProgress"
   | "finished"
   | "approved";
 
@@ -19,7 +19,7 @@ export class StudentCourse extends Entity<StudentCourseProps> {
   constructor(props: StudentCourseProps) {
     super({
       ...props,
-      status: props.status || "not-started",
+      status: props.status || "notStarted",
     });
   }
 
@@ -33,9 +33,9 @@ export class StudentCourse extends Entity<StudentCourseProps> {
     }
 
     if (watchedLessons < 1) {
-      newStatus = "not-started";
+      newStatus = "notStarted";
     } else if (watchedLessons > 0 && watchedLessons < lessons.length) {
-      newStatus = "in-progress";
+      newStatus = "inProgress";
     } else {
       newStatus = "finished";
     }
