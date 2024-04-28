@@ -16,7 +16,7 @@ export class StudentLesson extends Entity<StudentLessonProps> {
     });
   }
 
-  watch(): void {
-    this.props.watched = true;
+  toggleWatch(): void {
+    this.props.watched = !this.props.watched;
   }
 }
