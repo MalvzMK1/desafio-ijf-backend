@@ -11,7 +11,7 @@ interface StudentProps {
   password: string;
 }
 
-export interface StudentConstructorProps extends StudentProps {
+interface StudentConstructorProps extends StudentProps {
   courses?: Array<Course>;
 }
 
