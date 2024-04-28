@@ -1,8 +1,13 @@
+import { CannotApproveStudentError } from "src/errors/cannot-approve-student";
 import { Entity } from "./base-entity";
 import { Course } from "./course";
 import { Student } from "./student";
 
-export type StudentCourseStatus = "not-started" | "in-progress" | "finished";
+export type StudentCourseStatus =
+  | "not-started"
+  | "in-progress"
+  | "finished"
+  | "approved";
 
 export interface StudentCourseProps {
   student: Student;
@@ -36,5 +41,10 @@ export class StudentCourse extends Entity<StudentCourseProps> {
     }
 
     this.props.status = newStatus;
+  }
+
+  approve(): void {
+    if (this.props.status === "finished") this.props.status = "approved";
+    else throw new CannotApproveStudentError();
   }
 }
