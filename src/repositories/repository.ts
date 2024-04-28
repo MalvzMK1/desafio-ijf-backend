@@ -25,7 +25,7 @@ export abstract class Repository<T extends Entity<K>, K> {
 
     if (foundIdx < 0) throw new NotFoundError();
 
-    this.data.slice(foundIdx, 1);
+    this.data.splice(foundIdx, 1);
   }
 
   protected findItemIndexById(id: T["id"]) {
