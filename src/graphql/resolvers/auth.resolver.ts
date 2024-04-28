@@ -12,7 +12,7 @@ import { UserRoleEnum } from "src/types/user-role";
 import { InvalidCredentialsError } from "src/errors/invalid-credentials";
 import { createAccessToken } from "src/utils/jwt";
 import { User } from "../entities/user";
-import { ForbiddenException } from "@nestjs/common";
+import { ForbiddenException, Logger } from "@nestjs/common";
 
 @Resolver()
 export class AuthResolver {
@@ -37,7 +37,7 @@ export class AuthResolver {
           username: input.username,
         },
       });
-    } else {
+    } else if (input.role === UserRoleEnum.teacher) {
       users = await prisma.teacher.findMany({
         where: {
           username: input.username,
@@ -47,15 +47,15 @@ export class AuthResolver {
 
     if (users.length < 1) throw new InvalidCredentialsError();
 
-    const valid = await bcrypt.compare(input.password, users[0].password);
+    Logger.log(users);
+
+    const valid = bcrypt.compareSync(input.password, users[0].password);
 
     if (valid) {
       return {
         token: createAccessToken(users[0].id, input.role),
       } as LoginResponse;
-    }
-
-    throw new InvalidCredentialsError();
+    } else throw new InvalidCredentialsError();
   }
 
   @Mutation(() => MeResponse, { nullable: false })
@@ -89,7 +89,7 @@ export class AuthResolver {
   }
 
   async #registerTeacher(input: RegisterInput): Promise<MeResponse> {
-    const { created_at, id, name, username } = await prisma.student.create({
+    const { created_at, id, name, username } = await prisma.teacher.create({
       data: {
         name: input.name,
         username: input.username,
