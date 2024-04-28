@@ -21,7 +21,7 @@ export abstract class Entity<T> {
     return this.#props;
   }
 
-  set props(props: T) {
+  protected set props(props: T) {
     this.#props = props;
   }
 }
