@@ -17,7 +17,10 @@ export abstract class Repository<T extends Entity<K>, K> {
   }
 
   get(id: T["id"]): T {
-    return this.data.find((item) => item.id === id);
+    const foundData = this.data.find((item) => item.id === id);
+
+    if (foundData) return foundData;
+    throw new NotFoundError();
   }
 
   delete(id: T["id"]): void {
