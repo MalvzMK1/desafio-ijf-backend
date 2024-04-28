@@ -1,4 +1,6 @@
-import { Module } from '@nestjs/common';
+/* istanbul ignore file */
+
+import { Module } from "@nestjs/common";
 
 @Module({
   imports: [],
