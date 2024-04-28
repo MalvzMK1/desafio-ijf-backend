@@ -14,13 +14,13 @@ datasource db {
 }
 
 model Student {
-  id            String          @id @default(uuid())
-  created_at    DateTime        @default(now())
-  name          String
-  password      String
-  username      String          @unique
-  StudentCourse StudentCourse[]
-  StudentLesson StudentLesson[]
+  id             String          @id @default(uuid())
+  created_at     DateTime        @default(now())
+  name           String
+  password       String
+  username       String          @unique
+  studentCourses StudentCourse[]
+  studentLessons StudentLesson[]
 }
 
 model Teacher {
@@ -29,7 +29,7 @@ model Teacher {
   name       String
   password   String
   username   String   @unique
-  Course     Course[]
+  courses    Course[]
 }
 
 model Course {
@@ -40,15 +40,15 @@ model Course {
   description String
   banner      String
 
-  teacher       Teacher         @relation(fields: [teacherId], references: [id])
-  StudentCourse StudentCourse[]
+  teacher        Teacher         @relation(fields: [teacherId], references: [id])
+  studentCourses StudentCourse[]
 }
 
 model Lesson {
-  id            String          @id @default(uuid())
-  created_at    DateTime        @default(now())
-  content       String
-  StudentLesson StudentLesson[]
+  id             String          @id @default(uuid())
+  created_at     DateTime        @default(now())
+  content        String
+  studentLessons StudentLesson[]
 }
 
 model StudentCourse {
