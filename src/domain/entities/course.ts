@@ -16,6 +16,10 @@ export interface CourseProps {
 
 export class Course extends Entity<CourseProps> {
   constructor(props: CourseProps) {
+    if (props.lessons.length < 1)
+      throw new CannotCreateError(
+        "It's not possible to create a course without a lesson",
+      );
     super({
       ...props,
       students: props.students || [],
