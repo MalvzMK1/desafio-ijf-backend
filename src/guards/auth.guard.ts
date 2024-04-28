@@ -47,19 +47,8 @@ export class AuthGuard implements CanActivate {
 }
 
 export function UseAuthGuard(
-  errorMessage?: string,
-): ReturnType<typeof UseGuards>;
-export function UseAuthGuard(
   allowedRoles?: UserRole[],
   errorMessage?: string,
-): ReturnType<typeof UseGuards>;
-export function UseAuthGuard(
-  allowedRolesOrMessage?: UserRole[] | string,
-  errorMessage?: string,
 ): ReturnType<typeof UseGuards> {
-  if (typeof allowedRolesOrMessage === "string") {
-    return UseGuards(new AuthGuard(undefined, allowedRolesOrMessage));
-  }
-
-  return UseGuards(new AuthGuard(allowedRolesOrMessage, errorMessage));
+  return UseGuards(new AuthGuard(allowedRoles, errorMessage));
 }
