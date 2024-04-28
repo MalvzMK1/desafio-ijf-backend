@@ -14,8 +14,6 @@ export class Course extends Entity<CourseProps> {
   }
 
   edit(data: Partial<Omit<CourseProps, "teacher">>) {
-    const newData: CourseProps = { ...this.props, ...data };
-
-    this.props = newData;
+    this.props = { ...this.props, ...data };
   }
 }
