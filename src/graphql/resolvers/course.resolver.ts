@@ -10,11 +10,13 @@ import { GetCourseResponse } from "../responses/courses/get-course-response.type
 @Resolver()
 export class CourseResolver {
   @UseAuthGuard()
-  @Query(() => [Course], { nullable: false })
-  async fetchCourses(@Context() ctx: AppContext): Promise<Array<Course>> {
+  @Query(() => [GetCourseResponse], { nullable: false })
+  async fetchCourses(
+    @Context() ctx: AppContext,
+  ): Promise<Array<GetCourseResponse>> {
     const { role, id } = ctx.user;
 
-    let courses: Array<Course> = [];
+    let courses: Array<GetCourseResponse> = [];
 
     if (role === "student") {
       courses = await prisma.course.findMany({
@@ -93,8 +95,8 @@ export class CourseResolver {
     @Context() ctx: AppContext,
     @Args("input", { type: () => CreateCourseInput, nullable: false })
     input: CreateCourseInput,
-  ): Promise<Course> {
-    const course = await prisma.course.create({
+  ): Promise<GetCourseResponse> {
+    const course: GetCourseResponse = await prisma.course.create({
       data: {
         name: input.name,
         description: input.description,
@@ -108,7 +110,11 @@ export class CourseResolver {
       },
       include: {
         teacher: true,
-        studentCourses: true,
+        studentCourses: {
+          include: {
+            student: true,
+          },
+        },
       },
     });
 
