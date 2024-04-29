@@ -39,6 +39,7 @@ model Course {
   name        String   @unique
   description String
   banner      String
+  lessons     Lesson[]
 
   teacher        Teacher         @relation(fields: [teacherId], references: [id])
   studentCourses StudentCourse[]
@@ -49,6 +50,9 @@ model Lesson {
   created_at     DateTime        @default(now())
   content        String
   studentLessons StudentLesson[]
+  courseId       String?
+
+  Course Course? @relation(fields: [courseId], references: [id])
 }
 
 model StudentCourse {
