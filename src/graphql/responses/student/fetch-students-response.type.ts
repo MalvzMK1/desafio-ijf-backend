@@ -22,6 +22,9 @@ class FetchStudentsResponseStudentCourse {
 
   @Field(() => FetchStudentsResponseStudentCourseCourse, { nullable: false })
   course: FetchStudentsResponseStudentCourseCourse;
+
+  @Field(() => String)
+  status: string;
 }
 
 @ObjectType()

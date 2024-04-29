@@ -7,7 +7,7 @@ import { GetLessonResponse } from "../responses/lesson/get-lesson-response.type"
 import { WatchLessonInput } from "../inputs/lesson/watch-lesson.input";
 import { StudentCourseStatus } from "src/domain/entities/studentCourse";
 import { AppContext } from "src/types/app-context";
-import { Logger, UnauthorizedException } from "@nestjs/common";
+import { NotFoundError } from "src/errors/not-found-error";
 
 @Resolver()
 export class LessonResolver {
@@ -44,14 +44,18 @@ export class LessonResolver {
     ctx: AppContext,
   ): Promise<GetLessonResponse> {
     const { id: userId } = ctx.user;
-    Logger.warn(userId);
-    const [studentLesson] = await prisma.studentLesson.findMany({
+
+    const allStudentLessons = await prisma.studentLesson.findMany({
       where: {
         lessonId: input.lessonId,
       },
     });
 
-    if (studentLesson.studentId !== userId) throw new UnauthorizedException();
+    const studentLesson = allStudentLessons.find(
+      (item) => item.studentId === userId,
+    );
+
+    if (!studentLesson) throw new NotFoundError();
 
     const updatedStudentLesson = await prisma.studentLesson.update({
       where: {

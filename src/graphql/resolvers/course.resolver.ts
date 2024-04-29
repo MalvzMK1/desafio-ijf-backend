@@ -8,7 +8,6 @@ import { AddStudentToCourseInput } from "../inputs/course/add-student-to-course.
 import { GetCourseResponse } from "../responses/courses/get-course-response.type";
 import { EditCourseInput } from "../inputs/course/edit-course.input";
 import { DeleteCourseInput } from "../inputs/course/delete-course.input";
-import { Logger } from "@nestjs/common";
 import { RemoveStudentFromCourseInput } from "../inputs/course/remove-student-from-course.input";
 import { RemoveStudentFromCourseResponse } from "../responses/courses/remove-user-response.type";
 
@@ -222,7 +221,6 @@ export class CourseResolver {
     });
 
     for (const lesson of lessons) {
-      Logger.error(lesson);
       await prisma.studentLesson.create({
         data: {
           student: {
