@@ -47,8 +47,6 @@ export class AuthResolver {
 
     if (users.length < 1) throw new InvalidCredentialsError();
 
-    Logger.log(users);
-
     const valid = bcrypt.compareSync(input.password, users[0].password);
 
     if (valid) {

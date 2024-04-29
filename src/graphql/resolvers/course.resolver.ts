@@ -3,10 +3,9 @@ import { Course } from "../entities/course";
 import { AppContext } from "src/types/app-context";
 import { UseAuthGuard } from "src/guards/auth.guard";
 import prisma from "src/database/prisma";
-import { Logger } from "@nestjs/common";
 import { CreateCourseInput } from "../inputs/course/create-course.input";
-import { CreateCourseUseCase } from "src/domain/use-cases/create-course";
-import { LessonResolver } from "./lesson.resolver";
+import { AddStudentToCourseInput } from "../inputs/course/add-student-to-course.input";
+import { GetCourseResponse } from "../responses/courses/get-course-response.type";
 
 @Resolver()
 export class CourseResolver {
@@ -112,6 +111,54 @@ export class CourseResolver {
         studentCourses: true,
       },
     });
+
+    return course;
+  }
+
+  @UseAuthGuard(["teacher"])
+  @Mutation(() => GetCourseResponse, { nullable: false })
+  async addStudentToCourse(
+    @Args("input", { type: () => AddStudentToCourseInput, nullable: false })
+    input: AddStudentToCourseInput,
+  ): Promise<GetCourseResponse> {
+    const course = (await prisma.course.update({
+      where: {
+        id: input.courseId,
+      },
+      data: {
+        studentCourses: {
+          create: {
+            student: {
+              connect: {
+                id: input.studentId,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        teacher: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+          },
+        },
+        studentCourses: {
+          select: {
+            courseId: true,
+            status: true,
+            student: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    })) as GetCourseResponse;
 
     return course;
   }
