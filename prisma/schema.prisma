@@ -58,8 +58,8 @@ model Lesson {
 model StudentCourse {
   id         String              @id @default(uuid())
   created_at DateTime            @default(now())
-  studentId  String              @unique
-  courseId   String              @unique
+  studentId  String
+  courseId   String
   status     StudentCourseStatus @default(notStarted)
 
   student Student @relation(fields: [studentId], references: [id])
@@ -69,8 +69,8 @@ model StudentCourse {
 model StudentLesson {
   id         String   @id @default(uuid())
   created_at DateTime @default(now())
-  studentId  String   @unique
-  lessonId   String   @unique
+  studentId  String
+  lessonId   String
   watched    Boolean  @default(false)
 
   student Student @relation(fields: [studentId], references: [id])
