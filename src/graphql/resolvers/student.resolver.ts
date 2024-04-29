@@ -1,9 +1,10 @@
-import { Args, Mutation, Resolver } from "@nestjs/graphql";
+import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { UseAuthGuard } from "src/guards/auth.guard";
 import { ApproveStudentResponse } from "../responses/student/approve-student-response.type";
 import { ApproveStudentInput } from "../inputs/student/approve-student.input";
 import prisma from "src/database/prisma";
 import { CannotApproveStudentError } from "src/errors/cannot-approve-student";
+import { FetchStudentsResponse } from "../responses/student/fetch-students-response.type";
 
 @Resolver()
 export class StudentResolver {
@@ -33,5 +34,21 @@ export class StudentResolver {
     } else {
       throw new CannotApproveStudentError();
     }
+  }
+
+  @UseAuthGuard(["teacher"])
+  @Query(() => FetchStudentsResponse)
+  async fetchStudents(): Promise<FetchStudentsResponse> {
+    const students = await prisma.student.findMany({
+      include: {
+        studentCourses: {
+          include: {
+            course: true,
+          },
+        },
+      },
+    });
+
+    return { students };
   }
 }
