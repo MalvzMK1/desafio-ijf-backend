@@ -5,7 +5,9 @@ import { UseAuthGuard } from "src/guards/auth.guard";
 import prisma from "src/database/prisma";
 import { GetLessonResponse } from "../responses/lesson/get-lesson-response.type";
 import { WatchLessonInput } from "../inputs/lesson/watch-lesson.input";
+import { StudentCourseStatus } from "src/domain/entities/studentCourse";
 import { AppContext } from "src/types/app-context";
+import { Logger, UnauthorizedException } from "@nestjs/common";
 
 @Resolver()
 export class LessonResolver {
@@ -38,26 +40,111 @@ export class LessonResolver {
   async watchLesson(
     @Args("input", { type: () => WatchLessonInput, nullable: false })
     input: WatchLessonInput,
+    @Context()
+    ctx: AppContext,
   ): Promise<GetLessonResponse> {
-    const lesson = prisma.studentLesson.update({
+    const { id: userId } = ctx.user;
+    Logger.warn(userId);
+    const [studentLesson] = await prisma.studentLesson.findMany({
       where: {
-        id: input.id,
+        lessonId: input.lessonId,
+      },
+    });
+
+    if (studentLesson.studentId !== userId) throw new UnauthorizedException();
+
+    const updatedStudentLesson = await prisma.studentLesson.update({
+      where: {
+        id: studentLesson.id,
       },
       data: {
         watched: true,
       },
       select: {
         id: true,
+        watched: true,
         lesson: {
           select: {
             id: true,
             content: true,
+            Course: {
+              select: {
+                id: true,
+              },
+            },
           },
         },
-        watched: true,
       },
     });
 
-    return lesson;
+    const { id: courseId } = updatedStudentLesson.lesson.Course;
+
+    this.validateCourseStatus(userId, courseId);
+
+    return updatedStudentLesson;
+  }
+
+  async validateCourseStatus(
+    studentId: string,
+    courseId: string,
+  ): Promise<void> {
+    const studentsCourses = await prisma.studentCourse.findMany({
+      where: {
+        courseId,
+      },
+      include: {
+        course: {
+          include: {
+            lessons: {
+              include: {
+                studentLessons: {
+                  where: {
+                    studentId,
+                  },
+                  select: {
+                    watched: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let studentCourse: (typeof studentsCourses)[0];
+
+    for (const studentCourses of studentsCourses) {
+      if (studentCourses.studentId === studentId)
+        studentCourse = studentCourses;
+    }
+
+    if (!studentCourse) return;
+
+    const { lessons } = studentCourse.course;
+    let watchedLessons = 0;
+    let newStatus: StudentCourseStatus = "notStarted";
+
+    for (const lesson of lessons) {
+      if (lesson.studentLessons[0].watched) watchedLessons += 1;
+    }
+
+    if (watchedLessons > 0 && watchedLessons < lessons.length) {
+      newStatus = "inProgress";
+    }
+    if (watchedLessons === lessons.length) {
+      newStatus = "finished";
+    }
+
+    if (newStatus !== studentCourse.status) {
+      await prisma.studentCourse.update({
+        where: {
+          id: studentCourse.id,
+        },
+        data: {
+          status: newStatus,
+        },
+      });
+    }
   }
 }
