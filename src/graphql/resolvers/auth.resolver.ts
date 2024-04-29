@@ -13,6 +13,11 @@ import { InvalidCredentialsError } from "src/errors/invalid-credentials";
 import { createAccessToken } from "src/utils/jwt";
 import { User } from "../entities/user";
 import { ForbiddenException, Logger } from "@nestjs/common";
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from "@prisma/client/runtime/library";
+import { RegisterAlreadyExistsError } from "src/errors/register-already-exists";
 
 @Resolver()
 export class AuthResolver {
@@ -61,9 +66,18 @@ export class AuthResolver {
     @Args("input", { type: () => RegisterInput, nullable: false })
     input: RegisterInput,
   ): Promise<MeResponse> {
-    if (input.role === "student") return await this.#registerStudent(input);
-    else if (input.role === "teacher")
-      return await this.#registerTeacher(input);
+    try {
+      if (input.role === "student") return await this.#registerStudent(input);
+      else if (input.role === "teacher")
+        return await this.#registerTeacher(input);
+    } catch (err) {
+      if (err instanceof PrismaClientKnownRequestError) {
+        if (err.code === "P2002") {
+          throw new RegisterAlreadyExistsError(`${input.role} user`);
+        }
+      }
+      throw err;
+    }
   }
 
   async #registerStudent(input: RegisterInput): Promise<MeResponse> {

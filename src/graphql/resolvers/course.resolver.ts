@@ -10,6 +10,9 @@ import { EditCourseInput } from "../inputs/course/edit-course.input";
 import { DeleteCourseInput } from "../inputs/course/delete-course.input";
 import { RemoveStudentFromCourseInput } from "../inputs/course/remove-student-from-course.input";
 import { RemoveStudentFromCourseResponse } from "../responses/courses/remove-user-response.type";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { RegisterAlreadyExistsError } from "src/errors/register-already-exists";
+import { CannotUpdateError } from "src/errors/cannot-create-duplicate-infos";
 
 @Resolver()
 export class CourseResolver {
@@ -87,29 +90,38 @@ export class CourseResolver {
     @Args("input", { type: () => CreateCourseInput, nullable: false })
     input: CreateCourseInput,
   ): Promise<GetCourseResponse> {
-    const course: GetCourseResponse = await prisma.course.create({
-      data: {
-        name: input.name,
-        description: input.description,
-        banner: input.banner,
-        teacherId: ctx.user.id,
-        lessons: {
-          createMany: {
-            data: input.lessons,
+    try {
+      const course: GetCourseResponse = await prisma.course.create({
+        data: {
+          name: input.name,
+          description: input.description,
+          banner: input.banner,
+          teacherId: ctx.user.id,
+          lessons: {
+            createMany: {
+              data: input.lessons,
+            },
           },
         },
-      },
-      include: {
-        teacher: true,
-        studentCourses: {
-          include: {
-            student: true,
+        include: {
+          teacher: true,
+          studentCourses: {
+            include: {
+              student: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    return course;
+      return course;
+    } catch (err) {
+      if (err instanceof PrismaClientKnownRequestError) {
+        if (err.code === "P2002") {
+          throw new RegisterAlreadyExistsError("Course");
+        }
+      }
+      throw err;
+    }
   }
 
   @UseAuthGuard(["teacher"])
@@ -118,31 +130,40 @@ export class CourseResolver {
     @Args("input", { type: () => EditCourseInput, nullable: false })
     input: EditCourseInput,
   ): Promise<GetCourseResponse> {
-    const courseCurrentData = await prisma.course.findUnique({
-      where: {
-        id: input.id,
-      },
-    });
+    try {
+      const courseCurrentData = await prisma.course.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
 
-    const course = await prisma.course.update({
-      where: {
-        id: input.id,
-      },
-      data: {
-        ...courseCurrentData,
-        ...input,
-      },
-      include: {
-        teacher: true,
-        studentCourses: {
-          include: {
-            student: true,
+      const course = await prisma.course.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          ...courseCurrentData,
+          ...input,
+        },
+        include: {
+          teacher: true,
+          studentCourses: {
+            include: {
+              student: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    return course;
+      return course;
+    } catch (err) {
+      if (err instanceof PrismaClientKnownRequestError) {
+        if (err.code === "P2002") {
+          throw new CannotUpdateError("duplicated data");
+        }
+      }
+      throw err;
+    }
   }
 
   @UseAuthGuard(["teacher"])
