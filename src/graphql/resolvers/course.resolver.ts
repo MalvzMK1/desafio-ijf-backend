@@ -11,7 +11,7 @@ import { DeleteCourseInput } from "../inputs/course/delete-course.input";
 
 @Resolver()
 export class CourseResolver {
-  @UseAuthGuard(["teacher"])
+  @UseAuthGuard()
   @Query(() => [GetCourseResponse], { nullable: false })
   async fetchCourses(
     @Context() ctx: AppContext,
@@ -30,60 +30,28 @@ export class CourseResolver {
           },
         },
         include: {
+          lessons: true,
+          teacher: true,
           studentCourses: {
+            where: {
+              studentId: id,
+            },
             include: {
-              course: {
-                include: {
-                  studentCourses: true,
-                  teacher: true,
-                },
-              },
-              student: {
-                include: {
-                  studentCourses: true,
-                  studentLessons: true,
-                },
-              },
+              student: true,
             },
           },
-          teacher: true,
         },
       });
     } else {
       courses = await prisma.course.findMany({
         include: {
-          teacher: true,
+          lessons: true,
           studentCourses: {
             include: {
-              student: {
-                include: {
-                  studentCourses: {
-                    include: {
-                      student: true,
-                      course: true,
-                    },
-                  },
-                  studentLessons: {
-                    include: {
-                      student: true,
-                      lesson: true,
-                    },
-                  },
-                },
-              },
-              course: {
-                include: {
-                  studentCourses: {
-                    include: {
-                      student: true,
-                      course: true,
-                    },
-                  },
-                  teacher: true,
-                },
-              },
+              student: true,
             },
           },
+          teacher: true,
         },
       });
     }
