@@ -11,7 +11,7 @@ import { DeleteCourseInput } from "../inputs/course/delete-course.input";
 
 @Resolver()
 export class CourseResolver {
-  @UseAuthGuard()
+  @UseAuthGuard(["teacher"])
   @Query(() => [GetCourseResponse], { nullable: false })
   async fetchCourses(
     @Context() ctx: AppContext,
@@ -221,6 +221,28 @@ export class CourseResolver {
         },
       },
     })) as GetCourseResponse;
+
+    const { lessons } = await prisma.course.findUnique({
+      where: {
+        id: course.id,
+      },
+      include: {
+        lessons: true,
+      },
+    });
+
+    prisma.student.update({
+      where: {
+        id: input.studentId,
+      },
+      data: {
+        studentLessons: {
+          createMany: {
+            data: lessons.map((lesson) => ({ lessonId: lesson.id })),
+          },
+        },
+      },
+    });
 
     return course;
   }
