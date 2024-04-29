@@ -85,7 +85,7 @@ async function populate(): Promise<void> {
     },
   });
 
-  const johnCourse = await prisma.studentCourse.create({
+  await prisma.studentCourse.create({
     data: {
       student: {
         connect: {
@@ -100,7 +100,7 @@ async function populate(): Promise<void> {
     },
   });
 
-  const johnLesson = await prisma.studentLesson.create({
+  await prisma.studentLesson.create({
     data: {
       student: {
         connect: {
@@ -115,7 +115,7 @@ async function populate(): Promise<void> {
     },
   });
 
-  const janeCourse = await prisma.studentCourse.create({
+  await prisma.studentCourse.create({
     data: {
       student: {
         connect: {
@@ -130,7 +130,7 @@ async function populate(): Promise<void> {
     },
   });
 
-  const janeLesson = await prisma.studentLesson.create({
+  await prisma.studentLesson.create({
     data: {
       student: {
         connect: {
