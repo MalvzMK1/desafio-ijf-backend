@@ -1,9 +1,12 @@
-import { Context, Query, Resolver } from "@nestjs/graphql";
+import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Course } from "../entities/course";
 import { AppContext } from "src/types/app-context";
 import { UseAuthGuard } from "src/guards/auth.guard";
 import prisma from "src/database/prisma";
 import { Logger } from "@nestjs/common";
+import { CreateCourseInput } from "../inputs/course/create-course.input";
+import { CreateCourseUseCase } from "src/domain/use-cases/create-course";
+import { LessonResolver } from "./lesson.resolver";
 
 @Resolver()
 export class CourseResolver {
@@ -11,8 +14,7 @@ export class CourseResolver {
   @Query(() => [Course], { nullable: false })
   async fetchCourses(@Context() ctx: AppContext): Promise<Array<Course>> {
     const { role, id } = ctx.user;
-    Logger.log(role);
-    Logger.log(id);
+
     let courses: Array<Course> = [];
 
     if (role === "student") {
@@ -84,5 +86,33 @@ export class CourseResolver {
     }
 
     return courses;
+  }
+
+  @UseAuthGuard(["teacher"])
+  @Mutation(() => Course, { nullable: false })
+  async createCourse(
+    @Context() ctx: AppContext,
+    @Args("input", { type: () => CreateCourseInput, nullable: false })
+    input: CreateCourseInput,
+  ): Promise<Course> {
+    const course = await prisma.course.create({
+      data: {
+        name: input.name,
+        description: input.description,
+        banner: input.banner,
+        teacherId: ctx.user.id,
+        lessons: {
+          createMany: {
+            data: input.lessons,
+          },
+        },
+      },
+      include: {
+        teacher: true,
+        studentCourses: true,
+      },
+    });
+
+    return course;
   }
 }

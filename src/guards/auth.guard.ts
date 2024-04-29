@@ -2,17 +2,15 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
-  UnauthorizedException,
   UseGuards,
   Logger,
+  ForbiddenException,
 } from "@nestjs/common";
 import { GqlExecutionContext } from "@nestjs/graphql";
 import { JwtService } from "@nestjs/jwt";
-import { AppContext, ContextUser } from "src/types/app-context";
+import { AppContext } from "src/types/app-context";
 import { UserRole } from "src/types/user-role";
 import { getUserFromHeaders } from "src/utils/get-user-from-headers";
-import { getTokenPayload } from "src/utils/jwt";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -28,6 +26,9 @@ export class AuthGuard implements CanActivate {
 
     try {
       const user = await getUserFromHeaders(ctx.request.headers);
+
+      if (this.allowedRoles && !this.allowedRoles.includes(user.role))
+        throw new ForbiddenException();
 
       ctx.user = user;
 

@@ -43,17 +43,17 @@ describe("Student tests", () => {
 
     expect(courses.length).toStrictEqual(1);
     expect(courses[0].props.course).toStrictEqual(course);
-    expect(courses[0].props.status).toStrictEqual("not-started");
+    expect(courses[0].props.status).toStrictEqual("notStarted");
 
     student.toggleWatchedLessonStatus(lesson1.id);
 
     expect(lessons[0].props.watched).toBeTruthy();
     expect(lessons[1].props.watched).toBeFalsy();
-    expect(courses[0].props.status).toStrictEqual("in-progress");
+    expect(courses[0].props.status).toStrictEqual("inProgress");
 
     student.toggleWatchedLessonStatus(lesson2.id);
     expect(lessons[1].props.watched).toBeTruthy();
-    expect(courses[0].props.status).toStrictEqual("in-progress");
+    expect(courses[0].props.status).toStrictEqual("inProgress");
 
     student.toggleWatchedLessonStatus(lesson3.id);
     expect(lessons[2].props.watched).toBeTruthy();
@@ -61,7 +61,7 @@ describe("Student tests", () => {
 
     student.toggleWatchedLessonStatus(lesson2.id);
     expect(lessons[1].props.watched).toBeFalsy();
-    expect(courses[0].props.status).toStrictEqual("in-progress");
+    expect(courses[0].props.status).toStrictEqual("inProgress");
 
     expect(() => {
       courses[0].approve();
