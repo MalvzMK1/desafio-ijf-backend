@@ -8,6 +8,7 @@ import { AddStudentToCourseInput } from "../inputs/course/add-student-to-course.
 import { GetCourseResponse } from "../responses/courses/get-course-response.type";
 import { EditCourseInput } from "../inputs/course/edit-course.input";
 import { DeleteCourseInput } from "../inputs/course/delete-course.input";
+import { Logger } from "@nestjs/common";
 
 @Resolver()
 export class CourseResolver {
@@ -37,7 +38,15 @@ export class CourseResolver {
               studentId: id,
             },
             include: {
-              student: true,
+              student: {
+                include: {
+                  studentLessons: {
+                    where: {
+                      studentId: id,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -48,7 +57,18 @@ export class CourseResolver {
           lessons: true,
           studentCourses: {
             include: {
-              student: true,
+              student: {
+                include: {
+                  studentLessons: {
+                    select: {
+                      id: true,
+                      studentId: true,
+                      lessonId: true,
+                      watched: true,
+                    },
+                  },
+                },
+              },
             },
           },
           teacher: true,
@@ -199,18 +219,23 @@ export class CourseResolver {
       },
     });
 
-    prisma.student.update({
-      where: {
-        id: input.studentId,
-      },
-      data: {
-        studentLessons: {
-          createMany: {
-            data: lessons.map((lesson) => ({ lessonId: lesson.id })),
+    for (const lesson of lessons) {
+      Logger.error(lesson);
+      await prisma.studentLesson.create({
+        data: {
+          student: {
+            connect: {
+              id: input.studentId,
+            },
+          },
+          lesson: {
+            connect: {
+              id: lesson.id,
+            },
           },
         },
-      },
-    });
+      });
+    }
 
     return course;
   }
