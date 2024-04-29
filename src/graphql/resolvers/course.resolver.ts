@@ -9,6 +9,8 @@ import { GetCourseResponse } from "../responses/courses/get-course-response.type
 import { EditCourseInput } from "../inputs/course/edit-course.input";
 import { DeleteCourseInput } from "../inputs/course/delete-course.input";
 import { Logger } from "@nestjs/common";
+import { RemoveStudentFromCourseInput } from "../inputs/course/remove-student-from-course.input";
+import { RemoveStudentFromCourseResponse } from "../responses/courses/remove-user-response.type";
 
 @Resolver()
 export class CourseResolver {
@@ -238,5 +240,35 @@ export class CourseResolver {
     }
 
     return course;
+  }
+
+  @UseAuthGuard(["teacher"])
+  @Mutation(() => RemoveStudentFromCourseResponse)
+  async removeStudentFromCourse(
+    @Args("input", {
+      type: () => RemoveStudentFromCourseInput,
+      nullable: false,
+    })
+    input: RemoveStudentFromCourseInput,
+  ): Promise<RemoveStudentFromCourseResponse> {
+    const allStudentsFromCourse = await prisma.studentCourse.findMany({
+      where: {
+        courseId: input.courseId,
+      },
+    });
+
+    const studentCourse = allStudentsFromCourse.find(
+      (item) => item.studentId === input.studentId,
+    );
+
+    await prisma.studentCourse.delete({
+      where: {
+        id: studentCourse.id,
+      },
+    });
+
+    return {
+      message: "Removed student from course successfully",
+    };
   }
 }
