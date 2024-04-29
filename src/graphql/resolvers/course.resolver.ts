@@ -6,6 +6,8 @@ import prisma from "src/database/prisma";
 import { CreateCourseInput } from "../inputs/course/create-course.input";
 import { AddStudentToCourseInput } from "../inputs/course/add-student-to-course.input";
 import { GetCourseResponse } from "../responses/courses/get-course-response.type";
+import { EditCourseInput } from "../inputs/course/edit-course.input";
+import { DeleteCourseInput } from "../inputs/course/delete-course.input";
 
 @Resolver()
 export class CourseResolver {
@@ -119,6 +121,60 @@ export class CourseResolver {
     });
 
     return course;
+  }
+
+  @UseAuthGuard(["teacher"])
+  @Mutation(() => GetCourseResponse, { nullable: false })
+  async editCourse(
+    @Args("input", { type: () => EditCourseInput, nullable: false })
+    input: EditCourseInput,
+  ): Promise<GetCourseResponse> {
+    const courseCurrentData = await prisma.course.findUnique({
+      where: {
+        id: input.id,
+      },
+    });
+
+    const course = await prisma.course.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        ...courseCurrentData,
+        ...input,
+      },
+      include: {
+        teacher: true,
+        studentCourses: {
+          include: {
+            student: true,
+          },
+        },
+      },
+    });
+
+    return course;
+  }
+
+  @UseAuthGuard(["teacher"])
+  @Mutation(() => GetCourseResponse)
+  async deleteCourse(
+    @Args("input", { type: () => DeleteCourseInput, nullable: false })
+    input: DeleteCourseInput,
+  ): Promise<GetCourseResponse> {
+    return await prisma.course.delete({
+      where: {
+        id: input.id,
+      },
+      include: {
+        teacher: true,
+        studentCourses: {
+          include: {
+            student: true,
+          },
+        },
+      },
+    });
   }
 
   @UseAuthGuard(["teacher"])
