@@ -10,16 +10,16 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: school_db
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile.api
-    ports:
-      - "3000:3000"
-    depends_on:
-      - mysql
-    environment:
-      DATABASE_URL: "mysql://root:123456@localhost:3306/school_db"
-      JWT_ACCESS_TOKEN_SECRET: "ijf_challenge"
-      JWT_ACCESS_TOKEN_EXPIRES_IN: "30m"
-      SALT_OR_ROUNDS: "10"
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.api
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - mysql
+  #   environment:
+  #     DATABASE_URL: "mysql://root:123456@localhost:3306/school_db"
+  #     JWT_ACCESS_TOKEN_SECRET: "ijf_challenge"
+  #     JWT_ACCESS_TOKEN_EXPIRES_IN: "30m"
+  #     SALT_OR_ROUNDS: "10"
